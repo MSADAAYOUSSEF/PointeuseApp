@@ -32,7 +32,7 @@
                             </font>
                         </Label>
                     </StackPane>
-                    <Label text="CHRONOS" textFill="#2c3e50" style="-fx-font-weight: 900;">
+                    <Label text="Time Clock" textFill="#2c3e50" style="-fx-font-weight: 900;">
                         <font>
                             <Font size="26.0" />
                         </font>

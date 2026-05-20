@@ -1,6 +1,9 @@
 package com.example.pointeuseapp.controller;
 
+
 import com.example.pointeuseapp.model.*;
+import com.example.dto.EmployeeDTO;
+import java.util.List;
 import com.example.pointeuseapp.utils.TimeUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,7 +18,7 @@ public class ViewController {
     @FXML private Label dateLabel;
     @FXML private Label actualTimeLabel;
     @FXML private Label roundedTimeLabel;
-    @FXML private ComboBox<Employee> employeeComboBox;
+    @FXML private ComboBox<EmployeeDTO> employeeComboBox;
 
     private CheckPointController logicController;
 
@@ -26,8 +29,14 @@ public class ViewController {
         store.load();
         this.logicController = new CheckPointController(network, store);
 
-        employeeComboBox.getItems().add(new Employee(UUID.randomUUID(), "M'SADAA Youssef"));
-        employeeComboBox.getItems().add(new Employee(UUID.randomUUID(), "DEBBACH Ahmed"));
+        List<EmployeeDTO> listeEmployes = network.getEmployees();
+
+        if (listeEmployes != null && !listeEmployes.isEmpty()) {
+            employeeComboBox.getItems().addAll(listeEmployes);
+            System.out.println("✅ " + listeEmployes.size() + " employés chargés dans l'interface !");
+        } else {
+            System.err.println("⚠️ Serveur injoignable ou liste vide.");
+        }
 
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> updateTime()),
                 new KeyFrame(Duration.seconds(1)));
@@ -46,11 +55,19 @@ public class ViewController {
 
     @FXML
     protected void onCheckButtonClick() {
-        Employee selected = employeeComboBox.getValue();
+
+        EmployeeDTO selected = employeeComboBox.getValue();
+
         if (selected != null) {
             logicController.check(selected.getId().toString());
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Pointage enregistré pour " + selected.getName());
+
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Pointage enregistré pour " + selected.toString());
+            alert.showAndWait();
+        } else {
+            // +++ NOUVEAU CODE : Sécurité si l'utilisateur clique sans choisir personne +++
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un employé avant de pointer.");
             alert.showAndWait();
         }
     }
