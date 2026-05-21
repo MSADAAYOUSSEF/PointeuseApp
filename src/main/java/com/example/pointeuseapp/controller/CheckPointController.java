@@ -32,17 +32,19 @@ public class CheckPointController {
     public void resendPending() {
         if (store.getAll().isEmpty()) return;
 
-        boolean allSent = true;
+        java.util.List<CheckPoint> remainingList = new java.util.ArrayList<>();
+
         for (CheckPoint cp : store.getAll()) {
             boolean sent = networkClient.send(cp);
             if (sent) {
                 System.out.println("✅ Pointage en attente renvoyé !");
             } else {
                 System.out.println("❌ Toujours pas de réseau...");
-                allSent = false;
+                remainingList.add(cp); // ✅ On garde UNIQUEMENT ceux qui ont échoué
             }
         }
 
-
+        // ✅ On écrase l'ancienne liste avec la nouvelle (qui contient juste les restants)
+        store.updateAll(remainingList);
     }
 }

@@ -47,12 +47,17 @@ public class NetworkClient {
      * MÉTHODE DE TON COLLÈGUE (Sécurisée) : Envoie le pointage au serveur.
      */
     public boolean send(CheckPoint cp) {
+        // ✅ On ajoute le ObjectInputStream pour pouvoir écouter la réponse !
         try (Socket socket = new Socket(host, port);
-             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
+             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
 
             oos.writeObject(cp);
             oos.flush();
-            return true;
+
+            // ✅ On attend que le serveur dise que tout s'est bien passé
+            Object response = ois.readObject();
+            return "OK".equals(response);
 
         } catch (Exception e) {
             System.err.println("❌ Échec de l'envoi du pointage : " + e.getMessage());
