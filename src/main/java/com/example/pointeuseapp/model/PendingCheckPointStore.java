@@ -1,5 +1,6 @@
 package com.example.pointeuseapp.model;
 
+import com.example.dto.CheckPoint;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;

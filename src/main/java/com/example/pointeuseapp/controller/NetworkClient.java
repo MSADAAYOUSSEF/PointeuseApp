@@ -2,8 +2,7 @@ package com.example.pointeuseapp.controller;
 
 // ✅ Import crucial de ta nouvelle classe allégée
 import com.example.dto.EmployeeDTO;
-import com.example.pointeuseapp.model.CheckPoint;
-
+import com.example.dto.CheckPoint;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;

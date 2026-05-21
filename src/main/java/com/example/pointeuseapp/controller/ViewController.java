@@ -3,6 +3,7 @@ package com.example.pointeuseapp.controller;
 
 import com.example.pointeuseapp.model.*;
 import com.example.dto.EmployeeDTO;
+import com.example.dto.CheckPoint;
 import java.util.List;
 import com.example.pointeuseapp.utils.TimeUtils;
 import javafx.animation.KeyFrame;
@@ -19,6 +20,7 @@ public class ViewController {
     @FXML private Label actualTimeLabel;
     @FXML private Label roundedTimeLabel;
     @FXML private ComboBox<EmployeeDTO> employeeComboBox;
+    @FXML private RadioButton radioCheckIn;
 
     private CheckPointController logicController;
 
@@ -59,12 +61,22 @@ public class ViewController {
         EmployeeDTO selected = employeeComboBox.getValue();
 
         if (selected != null) {
-            logicController.check(selected.getId().toString());
+            boolean isCheckIn = radioCheckIn.isSelected();
+            String typeAction = isCheckIn ? "Entrée" : "Sortie";
 
+            LocalDateTime roundedTime = TimeUtils.roundToNearestQuarter(LocalDateTime.now());
+            CheckPoint cp = new CheckPoint(selected.getId(), roundedTime, isCheckIn);
+            NetworkClient network = new NetworkClient("localhost", 8080);
+            boolean success = network.send(cp);
+            if (success) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                        "Pointage d'" + typeAction + " enregistré pour " + selected.toString());
+                alert.showAndWait();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Erreur réseau.");
+                alert.showAndWait();
+            }
 
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Pointage enregistré pour " + selected.toString());
-            alert.showAndWait();
         } else {
             // +++ NOUVEAU CODE : Sécurité si l'utilisateur clique sans choisir personne +++
             Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un employé avant de pointer.");

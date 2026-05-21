@@ -1,9 +1,7 @@
 package com.example.pointeuseapp.controller;
 
-import com.example.pointeuseapp.model.CheckPoint;
+import com.example.dto.CheckPoint; // ✅ Import du bon DTO
 import com.example.pointeuseapp.model.PendingCheckPointStore;
-
-import java.time.LocalDateTime;
 
 public class CheckPointController {
 
@@ -15,33 +13,36 @@ public class CheckPointController {
         this.store = store;
     }
 
-    public void check(String employeeId) {
-
-        // 1. créer un pointage
-        CheckPoint cp = new CheckPoint(employeeId, LocalDateTime.now());
-
-        // 2. essayer d'envoyer
+    // ✅ Reçoit l'objet complet et renvoie un boolean pour l'interface
+    public boolean check(CheckPoint cp) {
+        // 1. Essayer d'envoyer
         boolean sent = networkClient.send(cp);
 
-        // 3. si échec → stocker
+        // 2. Si échec → stocker localement
         if (!sent) {
             store.add(cp);
-            System.out.println("Stocké localement !");
+            System.out.println("❌ Réseau injoignable : Stocké localement !");
+            return false;
         } else {
-            System.out.println("Envoyé au serveur !");
+            System.out.println("✅ Envoyé au serveur !");
+            return true;
         }
     }
 
     public void resendPending() {
+        if (store.getAll().isEmpty()) return;
 
+        boolean allSent = true;
         for (CheckPoint cp : store.getAll()) {
             boolean sent = networkClient.send(cp);
-
             if (sent) {
-                System.out.println("Pointage renvoyé !");
+                System.out.println("✅ Pointage en attente renvoyé !");
             } else {
-                System.out.println("Toujours pas envoyé...");
+                System.out.println("❌ Toujours pas de réseau...");
+                allSent = false;
             }
         }
+
+
     }
 }
