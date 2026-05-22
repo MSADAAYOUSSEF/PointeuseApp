@@ -1,7 +1,8 @@
 package com.example.pointeuseapp.controller;
 
-import com.example.dto.CheckPoint; // ✅ Import du bon DTO
+import com.example.dto.CheckPoint;
 import com.example.pointeuseapp.model.PendingCheckPointStore;
+import java.util.List;
 
 public class CheckPointController {
 
@@ -13,38 +14,49 @@ public class CheckPointController {
         this.store = store;
     }
 
-    // ✅ Reçoit l'objet complet et renvoie un boolean pour l'interface
     public boolean check(CheckPoint cp) {
-        // 1. Essayer d'envoyer
         boolean sent = networkClient.send(cp);
 
-        // 2. Si échec → stocker localement
         if (!sent) {
             store.add(cp);
             System.out.println("❌ Réseau injoignable : Stocké localement !");
             return false;
         } else {
             System.out.println("✅ Envoyé au serveur !");
+
+            // 🚀 LA MAGIE AUTOMATIQUE EST ICI :
+            // Puisque ça a marché, on sait que le serveur est en ligne.
+            // On en profite pour envoyer tout ce qui était bloqué !
+            int synced = resendPending();
+            if (synced > 0) {
+                System.out.println("🔄 " + synced + " anciens pointages ont été synchronisés silencieusement !");
+            }
+
             return true;
         }
     }
 
-    public void resendPending() {
-        if (store.getAll().isEmpty()) return;
+    // ✅ LA CORRECTION EST ICI : on remplace "void" par "int"
+    public int resendPending() {
+        if (store.getAll().isEmpty()) return 0; // Ajout du 0 ici aussi
 
-        java.util.List<CheckPoint> remainingList = new java.util.ArrayList<>();
+        int countSent = 0;
+        boolean allSent = true;
+        List<CheckPoint> pointagesEnAttente = new java.util.ArrayList<>(store.getAll());
 
-        for (CheckPoint cp : store.getAll()) {
+        for (CheckPoint cp : pointagesEnAttente) {
             boolean sent = networkClient.send(cp);
             if (sent) {
-                System.out.println("✅ Pointage en attente renvoyé !");
+                countSent++;
             } else {
-                System.out.println("❌ Toujours pas de réseau...");
-                remainingList.add(cp); // ✅ On garde UNIQUEMENT ceux qui ont échoué
+                allSent = false;
             }
         }
 
-        // ✅ On écrase l'ancienne liste avec la nouvelle (qui contient juste les restants)
-        store.updateAll(remainingList);
+        if (allSent) {
+            store.clear();
+        }
+
+        return countSent;
     }
 }

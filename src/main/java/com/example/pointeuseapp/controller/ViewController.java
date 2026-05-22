@@ -8,6 +8,7 @@ import java.util.List;
 import com.example.pointeuseapp.utils.TimeUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.util.Duration;
@@ -43,6 +44,16 @@ public class ViewController {
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> updateTime()),
                 new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Timeline.INDEFINITE);
+        Timeline autoSyncTimer = new Timeline(new KeyFrame(Duration.seconds(15), e -> {
+            int synced = logicController.resendPending();
+            if (synced > 0) {
+                // ✅ On utilise .show() et pas .showAndWait() pour ne pas bloquer l'écran
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Reconnexion automatique : " + synced + " pointages envoyés en arrière-plan !");
+                alert.show();
+            }
+        }));
+        autoSyncTimer.setCycleCount(Timeline.INDEFINITE);
+        autoSyncTimer.play();
         clock.play();
     }
 
@@ -57,7 +68,6 @@ public class ViewController {
 
     @FXML
     protected void onCheckButtonClick() {
-
         EmployeeDTO selected = employeeComboBox.getValue();
 
         if (selected != null) {
@@ -66,21 +76,26 @@ public class ViewController {
 
             LocalDateTime roundedTime = TimeUtils.roundToNearestQuarter(LocalDateTime.now());
             CheckPoint cp = new CheckPoint(selected.getId(), roundedTime, isCheckIn);
-            NetworkClient network = new NetworkClient("localhost", 8080);
-            boolean success = network.send(cp);
+
+            // 🚀 LA CORRECTION EST ICI : On utilise ton contrôleur intelligent (qui gère le hors-ligne)
+            // au lieu de recréer un NetworkClient direct !
+            boolean success = logicController.check(cp);
+
             if (success) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                        "Pointage d'" + typeAction + " enregistré pour " + selected.toString());
+                        "✅ Pointage d'" + typeAction + " enregistré et envoyé pour " + selected.toString());
                 alert.showAndWait();
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Erreur réseau.");
+                // Voici la fameuse alerte jaune !
+                Alert alert = new Alert(Alert.AlertType.WARNING,
+                        "⚠️ Serveur injoignable. Le pointage a été sauvegardé localement !");
                 alert.showAndWait();
             }
 
         } else {
-            // +++ NOUVEAU CODE : Sécurité si l'utilisateur clique sans choisir personne +++
             Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un employé avant de pointer.");
             alert.showAndWait();
         }
     }
+
 }

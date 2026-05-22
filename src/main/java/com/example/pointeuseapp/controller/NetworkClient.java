@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
+import java.net.InetSocketAddress;
 
 public class NetworkClient {
 
@@ -47,20 +48,26 @@ public class NetworkClient {
      * MÉTHODE DE TON COLLÈGUE (Sécurisée) : Envoie le pointage au serveur.
      */
     public boolean send(CheckPoint cp) {
-        // ✅ On ajoute le ObjectInputStream pour pouvoir écouter la réponse !
-        try (Socket socket = new Socket(host, port);
-             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+        // ✅ 1. On crée le socket vide
+        try (Socket socket = new Socket()) {
 
-            oos.writeObject(cp);
-            oos.flush();
+            // ✅ 2. On tente de se connecter avec un délai maximum de 2 secondes !
+            socket.connect(new InetSocketAddress(host, port), 2000);
 
-            // ✅ On attend que le serveur dise que tout s'est bien passé
-            Object response = ois.readObject();
-            return "OK".equals(response);
+            try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+
+                // On envoie le pointage
+                oos.writeObject(cp);
+                oos.flush();
+
+                // On attend l'accusé de réception
+                Object reponse = ois.readObject();
+                return "OK".equals(reponse);
+            }
 
         } catch (Exception e) {
-            System.err.println("❌ Échec de l'envoi du pointage : " + e.getMessage());
+            // Le serveur est éteint ou injoignable, on échoue silencieusement
             return false;
         }
     }

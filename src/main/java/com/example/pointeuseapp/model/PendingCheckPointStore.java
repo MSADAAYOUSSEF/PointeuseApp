@@ -52,4 +52,13 @@ public class PendingCheckPointStore {
             System.err.println("❌ Erreur lors de la mise à jour du fichier local : " + e.getMessage());
         }
     }
+    // ✅ NOUVELLE MÉTHODE POUR VIDER LE FICHIER
+    public void clear() {
+        pending.clear();
+        try {
+            save(); // On sauvegarde le fichier vide sur le disque
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
