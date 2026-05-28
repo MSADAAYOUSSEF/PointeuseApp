@@ -41,7 +41,7 @@ public class ViewController {
 
         if (listeEmployes != null && !listeEmployes.isEmpty()) {
             employeeComboBox.getItems().addAll(listeEmployes);
-            System.out.println("✅ " + listeEmployes.size() + " employés chargés dans l'interface !");
+            System.out.println(listeEmployes.size() + " employés chargés dans l'interface !");
         } else {
             System.err.println("⚠️ Serveur injoignable ou liste vide.");
         }
@@ -52,8 +52,7 @@ public class ViewController {
         Timeline autoSyncTimer = new Timeline(new KeyFrame(Duration.seconds(15), e -> {
             int synced = logicController.resendPending();
             if (synced > 0) {
-                // ✅ On utilise .show() et pas .showAndWait() pour ne pas bloquer l'écran
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Reconnexion automatique : " + synced + " pointages envoyés en arrière-plan !");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Reconnexion automatique : " + synced + " pointages envoyés en arrière-plan !");
                 alert.show();
             }
         }));
@@ -82,18 +81,15 @@ public class ViewController {
             LocalDateTime roundedTime = TimeUtils.roundToNearestQuarter(LocalDateTime.now());
             CheckPoint cp = new CheckPoint(selected.getId(), roundedTime, isCheckIn);
 
-            // 🚀 LA CORRECTION EST ICI : On utilise ton contrôleur intelligent (qui gère le hors-ligne)
-            // au lieu de recréer un NetworkClient direct !
             boolean success = logicController.check(cp);
 
             if (success) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                        "✅ Pointage d'" + typeAction + " enregistré et envoyé pour " + selected.toString());
+                        "Pointage d'" + typeAction + " enregistré et envoyé pour " + selected.toString());
                 alert.showAndWait();
             } else {
-                // Voici la fameuse alerte jaune !
                 Alert alert = new Alert(Alert.AlertType.WARNING,
-                        "⚠️ Serveur injoignable. Le pointage a été sauvegardé localement !");
+                        "Serveur injoignable. Le pointage a été sauvegardé localement !");
                 alert.showAndWait();
             }
 
@@ -105,15 +101,13 @@ public class ViewController {
 
     @FXML
     protected void onSettingsButtonClick() {
-        // 1. Création de la boîte de dialogue JavaFX
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Configuration Réseau");
-        dialog.setHeaderText("Paramètres de connexion au Serveur");
 
-        // 2. Ajout des boutons OK et Annuler
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Network Configuration");
+        dialog.setHeaderText("Server connection settings");
+
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // 3. Création des champs de saisie
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -121,18 +115,17 @@ public class ViewController {
         TextField ipField = new TextField(config.getServerIp());
         TextField portField = new TextField(String.valueOf(config.getServerPort()));
 
-        grid.add(new Label("Adresse IP :"), 0, 0);
+        grid.add(new Label("IP address :"), 0, 0);
         grid.add(ipField, 1, 0);
         grid.add(new Label("Port :"), 0, 1);
         grid.add(portField, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
 
-        // 4. Action lorsqu'on clique sur "OK"
         dialog.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    // On enregistre les nouvelles valeurs
+
                     config.setServerIp(ipField.getText());
                     config.setServerPort(Integer.parseInt(portField.getText()));
                     config.saveConfig();

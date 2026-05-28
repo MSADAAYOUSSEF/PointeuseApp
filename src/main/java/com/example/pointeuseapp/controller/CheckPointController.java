@@ -19,26 +19,23 @@ public class CheckPointController {
 
         if (!sent) {
             store.add(cp);
-            System.out.println("❌ Réseau injoignable : Stocké localement !");
+            System.out.println("Réseau injoignable : Stocké localement !");
             return false;
         } else {
-            System.out.println("✅ Envoyé au serveur !");
+            System.out.println("Envoyé au serveur !");
 
-            // 🚀 LA MAGIE AUTOMATIQUE EST ICI :
-            // Puisque ça a marché, on sait que le serveur est en ligne.
-            // On en profite pour envoyer tout ce qui était bloqué !
+
             int synced = resendPending();
             if (synced > 0) {
-                System.out.println("🔄 " + synced + " anciens pointages ont été synchronisés silencieusement !");
+                System.out.println(synced + " anciens pointages ont été synchronisés silencieusement !");
             }
 
             return true;
         }
     }
 
-    // ✅ LA CORRECTION EST ICI : on remplace "void" par "int"
     public int resendPending() {
-        if (store.getAll().isEmpty()) return 0; // Ajout du 0 ici aussi
+        if (store.getAll().isEmpty()) return 0;
 
         int countSent = 0;
         boolean allSent = true;
