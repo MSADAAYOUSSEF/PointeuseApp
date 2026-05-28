@@ -5,6 +5,8 @@ import com.example.pointeuseapp.model.*;
 import com.example.dto.EmployeeDTO;
 import com.example.dto.CheckPoint;
 import java.util.List;
+
+import com.example.pointeuseapp.utils.ConfigManager;
 import com.example.pointeuseapp.utils.TimeUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -15,6 +17,7 @@ import javafx.util.Duration;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import javafx.scene.layout.GridPane;
 
 public class ViewController {
     @FXML private Label dateLabel;
@@ -24,10 +27,12 @@ public class ViewController {
     @FXML private RadioButton radioCheckIn;
 
     private CheckPointController logicController;
+    private ConfigManager config;
 
     @FXML
     public void initialize() {
-        NetworkClient network = new NetworkClient("localhost", 8080);
+        this.config = new ConfigManager();
+        NetworkClient network = new NetworkClient(config.getServerIp(), config.getServerPort());
         PendingCheckPointStore store = new PendingCheckPointStore();
         store.load();
         this.logicController = new CheckPointController(network, store);
@@ -96,6 +101,51 @@ public class ViewController {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner un employé avant de pointer.");
             alert.showAndWait();
         }
+    }
+
+    @FXML
+    protected void onSettingsButtonClick() {
+        // 1. Création de la boîte de dialogue JavaFX
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Configuration Réseau");
+        dialog.setHeaderText("Paramètres de connexion au Serveur");
+
+        // 2. Ajout des boutons OK et Annuler
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // 3. Création des champs de saisie
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField ipField = new TextField(config.getServerIp());
+        TextField portField = new TextField(String.valueOf(config.getServerPort()));
+
+        grid.add(new Label("Adresse IP :"), 0, 0);
+        grid.add(ipField, 1, 0);
+        grid.add(new Label("Port :"), 0, 1);
+        grid.add(portField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // 4. Action lorsqu'on clique sur "OK"
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    // On enregistre les nouvelles valeurs
+                    config.setServerIp(ipField.getText());
+                    config.setServerPort(Integer.parseInt(portField.getText()));
+                    config.saveConfig();
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Paramètres sauvegardés !\nVeuillez relancer la pointeuse pour appliquer les changements.");
+                    alert.showAndWait();
+
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Le port doit être un nombre valide (ex: 8080) !");
+                    alert.showAndWait();
+                }
+            }
+        });
     }
 
 }

@@ -10,9 +10,9 @@
 
 <StackPane prefHeight="550.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #4ca1af);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pointeuseapp.controller.ViewController">
     <children>
-        <VBox alignment="CENTER" maxWidth="380.0" prefHeight="480.0" spacing="20.0" style="-fx-background-color: rgba(255, 255, 255, 0.95); -fx-background-radius: 30; -fx-border-radius: 30;">
+        <VBox alignment="CENTER" maxWidth="380.0" prefHeight="480.0" spacing="15.0" style="-fx-background-color: rgba(255, 255, 255, 0.95); -fx-background-radius: 30; -fx-border-radius: 30;">
             <padding>
-                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
             </padding>
             <effect>
                 <DropShadow blurType="THREE_PASS_BOX" height="50.0" radius="24.5" width="50.0">
@@ -22,6 +22,10 @@
                 </DropShadow>
             </effect>
             <children>
+
+                <HBox alignment="TOP_RIGHT" prefWidth="380.0">
+                    <Button text="⚙️ Configuration" onAction="#onSettingsButtonClick" style="-fx-background-color: #f1f2f6; -fx-text-fill: #57606f; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 5 12 5 12;" />
+                </HBox>
 
                 <VBox alignment="CENTER" spacing="5.0">
                     <StackPane>
@@ -86,6 +90,8 @@
                     </effect>
                 </VBox>
 
+                <Region VBox.vgrow="ALWAYS" />
+
                 <VBox spacing="8.0">
                     <children>
                         <Label text="USER IDENTIFICATION" textFill="#7f8c8d" style="-fx-font-weight: bold;">
@@ -95,7 +101,7 @@
                         </Label>
                         <ComboBox fx:id="employeeComboBox" maxWidth="1.7976931348623157E308" prefHeight="45.0" promptText="Select Employee" style="-fx-background-color: white; -fx-border-color: #dcdde1; -fx-border-radius: 10; -fx-background-radius: 10;" />
 
-                        <HBox alignment="CENTER" spacing="20.0">
+                        <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 5 0 10 0;">
                             <fx:define>
                                 <ToggleGroup fx:id="checkTypeGroup"/>
                             </fx:define>
@@ -111,7 +117,7 @@
 
                 <Button fx:id="checkButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCheckButtonClick" prefHeight="55.0" style="-fx-background-color: linear-gradient(to right, #3498db, #2980b9); -fx-text-fill: white; -fx-background-radius: 15; -fx-cursor: hand;" text="Validate">
                     <font>
-                        <Font name="System Bold" size="13.0" />
+                        <Font name="System Bold" size="14.0" />
                     </font>
                     <effect>
                         <DropShadow height="20.0" radius="9.5" width="20.0">
@@ -121,7 +127,6 @@
                         </DropShadow>
                     </effect>
                 </Button>
-
 
             </children>
         </VBox>
