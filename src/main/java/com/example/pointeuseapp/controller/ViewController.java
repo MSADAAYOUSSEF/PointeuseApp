@@ -1,25 +1,29 @@
 package com.example.pointeuseapp.controller;
 
-
 import com.example.pointeuseapp.model.*;
 import com.example.dto.EmployeeDTO;
 import com.example.dto.CheckPoint;
-import java.util.List;
-
 import com.example.pointeuseapp.utils.ConfigManager;
 import com.example.pointeuseapp.utils.TimeUtils;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.UUID;
-import javafx.scene.layout.GridPane;
+import java.util.List;
 
 public class ViewController {
+
     @FXML private Label dateLabel;
     @FXML private Label actualTimeLabel;
     @FXML private Label roundedTimeLabel;
@@ -32,23 +36,30 @@ public class ViewController {
     @FXML
     public void initialize() {
         this.config = new ConfigManager();
+
+        // Initialisation du réseau avec l'IP et le port de la configuration
         NetworkClient network = new NetworkClient(config.getServerIp(), config.getServerPort());
         PendingCheckPointStore store = new PendingCheckPointStore();
         store.load();
+
         this.logicController = new CheckPointController(network, store);
 
+        // Récupération de la liste des employés depuis le serveur RH
         List<EmployeeDTO> listeEmployes = network.getEmployees();
 
         if (listeEmployes != null && !listeEmployes.isEmpty()) {
             employeeComboBox.getItems().addAll(listeEmployes);
             System.out.println(listeEmployes.size() + " employés chargés dans l'interface !");
         } else {
-            System.err.println("⚠️ Serveur injoignable ou liste vide.");
+            System.err.println("Serveur injoignable ou liste vide. Vérifiez l'IP et le Port dans les paramètres.");
         }
 
+        // Horloge en temps réel
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> updateTime()),
                 new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Timeline.INDEFINITE);
+
+        // Synchronisation automatique en arrière-plan (mode hors-ligne)
         Timeline autoSyncTimer = new Timeline(new KeyFrame(Duration.seconds(15), e -> {
             int synced = logicController.resendPending();
             if (synced > 0) {
@@ -57,6 +68,7 @@ public class ViewController {
             }
         }));
         autoSyncTimer.setCycleCount(Timeline.INDEFINITE);
+
         autoSyncTimer.play();
         clock.play();
     }
@@ -99,46 +111,26 @@ public class ViewController {
         }
     }
 
+    // ✅ NOUVELLE MÉTHODE : Ouvre proprement la fenêtre des paramètres
     @FXML
     protected void onSettingsButtonClick() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/pointeuseapp/view/settings-dialog.fxml"));
+            Parent parent = fxmlLoader.load();
 
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Network Configuration");
-        dialog.setHeaderText("Server connection settings");
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Paramètres Réseau");
+            dialogStage.setScene(new Scene(parent));
 
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            // Empêche de cliquer sur la pointeuse tant que les paramètres sont ouverts
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.setResizable(false);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
+            dialogStage.showAndWait();
 
-        TextField ipField = new TextField(config.getServerIp());
-        TextField portField = new TextField(String.valueOf(config.getServerPort()));
-
-        grid.add(new Label("IP address :"), 0, 0);
-        grid.add(ipField, 1, 0);
-        grid.add(new Label("Port :"), 0, 1);
-        grid.add(portField, 1, 1);
-
-        dialog.getDialogPane().setContent(grid);
-
-        dialog.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-
-                    config.setServerIp(ipField.getText());
-                    config.setServerPort(Integer.parseInt(portField.getText()));
-                    config.saveConfig();
-
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Paramètres sauvegardés !\nVeuillez relancer la pointeuse pour appliquer les changements.");
-                    alert.showAndWait();
-
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Le port doit être un nombre valide (ex: 8080) !");
-                    alert.showAndWait();
-                }
-            }
-        });
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture des paramètres : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-
 }

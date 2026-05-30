@@ -46,7 +46,7 @@ public class ConfigManager {
         try {
             return Integer.parseInt(properties.getProperty("server.port", "8080"));
         } catch (NumberFormatException e) {
-            System.err.println("⚠️ Port invalide dans la configuration, utilisation du port 8080 par défaut.");
+            System.err.println("Port invalide dans la configuration, utilisation du port 8080 par défaut.");
             return 8080;
         }
     }
