@@ -1,134 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.paint.Color?>
-<?import javafx.scene.shape.Circle?>
 
-<StackPane prefHeight="550.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #4ca1af);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pointeuseapp.controller.ViewController">
+<StackPane prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #f0f4f8;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pointeuseapp.controller.ViewController">
     <children>
-        <VBox alignment="CENTER" maxWidth="380.0" prefHeight="480.0" spacing="15.0" style="-fx-background-color: rgba(255, 255, 255, 0.95); -fx-background-radius: 30; -fx-border-radius: 30;">
-            <padding>
-                <Insets bottom="30.0" left="40.0" right="40.0" top="20.0" />
-            </padding>
+
+        <VBox alignment="CENTER" maxWidth="420.0" prefHeight="540.0" spacing="0" style="-fx-background-color: #ffffff; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;">
+
             <effect>
-                <DropShadow blurType="THREE_PASS_BOX" height="50.0" radius="24.5" width="50.0">
+                <DropShadow blurType="GAUSSIAN" height="30.0" radius="14.5" width="30.0" offsetY="5.0">
                     <color>
-                        <Color opacity="0.3" />
+                        <Color opacity="0.06" />
                     </color>
                 </DropShadow>
             </effect>
-            <children>
 
-                <HBox alignment="TOP_RIGHT" prefWidth="380.0">
-                    <Button text="⚙️ Configuration" onAction="#onSettingsButtonClick" style="-fx-background-color: #f1f2f6; -fx-text-fill: #57606f; -fx-cursor: hand; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 15; -fx-padding: 5 12 5 12;" />
-                </HBox>
-
-                <VBox alignment="CENTER" spacing="5.0">
-                    <StackPane>
-                        <Circle radius="25.0" fill="#3498db" opacity="0.1" />
-                        <Label text="🕒" textFill="#3498db">
-                            <font>
-                                <Font size="30.0" />
-                            </font>
-                        </Label>
-                    </StackPane>
-                    <Label text="Time Clock" textFill="#2c3e50" style="-fx-font-weight: 900;">
-                        <font>
-                            <Font size="26.0" />
-                        </font>
-                    </Label>
-                    <Label text="SMART TIME TRACKING" textFill="#95a5a6" style="-fx-letter-spacing: 3;">
-                        <font>
-                            <Font size="9.0" />
-                        </font>
-                    </Label>
+            <HBox alignment="CENTER_LEFT" prefHeight="70.0" style="-fx-padding: 20 30 10 30;">
+                <VBox alignment="CENTER_LEFT">
+                    <Label text="TIME CLOCK" textFill="#0b2545" style="-fx-font-weight: 900; -fx-font-size: 22px; -fx-letter-spacing: -0.5;" />
+                    <Label text="EMPLOYEE PORTAL" textFill="#64748b" style="-fx-font-weight: bold; -fx-font-size: 10px; -fx-letter-spacing: 1.5;" />
                 </VBox>
 
-                <Separator maxWidth="150.0" opacity="0.5" />
+                <Region HBox.hgrow="ALWAYS" />
 
-                <Label fx:id="dateLabel" text="Wednesday, May 13, 2026" textFill="#34495e">
-                    <font>
-                        <Font name="System Medium" size="15.0" />
-                    </font>
-                </Label>
+                <Button text="⚙ Settings" onAction="#onSettingsButtonClick" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-cursor: hand; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 12 6 12;" />
+            </HBox>
 
-                <VBox alignment="CENTER" spacing="0.0" style="-fx-background-color: #ffffff; -fx-background-radius: 20; -fx-border-color: #ecf0f1; -fx-border-radius: 20; -fx-border-width: 2;">
-                    <padding>
-                        <Insets bottom="15.0" top="15.0" />
-                    </padding>
-                    <children>
-                        <Label fx:id="actualTimeLabel" text="11:42" textFill="#2c3e50">
-                            <font>
-                                <Font name="Monospaced Bold" size="60.0" />
-                            </font>
-                        </Label>
-                        <HBox alignment="CENTER" spacing="5.0">
-                            <children>
-                                <Label text="ESTIMATED:" textFill="#bdc3c7">
-                                    <font>
-                                        <Font name="System Bold" size="10.0" />
-                                    </font>
-                                </Label>
-                                <Label fx:id="roundedTimeLabel" text="11:45" textFill="#e67e22">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-                            </children>
+            <Separator style="-fx-background-color: #f1f5f9;" />
+
+            <VBox alignment="CENTER" spacing="25.0" style="-fx-padding: 25 35 35 35;">
+
+                <VBox alignment="CENTER" spacing="15.0">
+                    <Label fx:id="dateLabel" text="Wednesday, May 13, 2026" textFill="#475569" style="-fx-font-size: 15px; -fx-font-weight: 600;" />
+
+                    <VBox alignment="CENTER" spacing="5.0" prefWidth="350.0" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20 15 20 15;">
+                        <Label fx:id="actualTimeLabel" text="11:42" textFill="#0b2545" style="-fx-font-size: 58px; -fx-font-weight: bold; -fx-font-family: 'Segoe UI', sans-serif;" />
+
+                        <HBox alignment="CENTER" spacing="6.0">
+                            <Label text="ESTIMATED:" textFill="#94a3b8" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-letter-spacing: 0.5;" />
+                            <Label fx:id="roundedTimeLabel" text="11:45" textFill="#3b82f6" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
                         </HBox>
-                    </children>
-                    <effect>
-                        <DropShadow height="10.0" radius="4.5" width="10.0">
-                            <color>
-                                <Color opacity="0.05" />
-                            </color>
-                        </DropShadow>
-                    </effect>
+                    </VBox>
                 </VBox>
 
-                <Region VBox.vgrow="ALWAYS" />
+                <VBox spacing="12.0" prefWidth="350.0">
 
-                <VBox spacing="8.0">
-                    <children>
-                        <Label text="USER IDENTIFICATION" textFill="#7f8c8d" style="-fx-font-weight: bold;">
-                            <font>
-                                <Font size="10.0" />
-                            </font>
-                        </Label>
-                        <ComboBox fx:id="employeeComboBox" maxWidth="1.7976931348623157E308" prefHeight="45.0" promptText="Select Employee" style="-fx-background-color: white; -fx-border-color: #dcdde1; -fx-border-radius: 10; -fx-background-radius: 10;" />
+                    <Label text="USER IDENTIFICATION" textFill="#475569" style="-fx-font-weight: 800; -fx-font-size: 11px; -fx-letter-spacing: 0.5;" />
 
-                        <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 5 0 10 0;">
-                            <fx:define>
-                                <ToggleGroup fx:id="checkTypeGroup"/>
-                            </fx:define>
-                            <RadioButton fx:id="radioCheckIn" text="Check In (Entrée)" selected="true" toggleGroup="$checkTypeGroup" textFill="#2c3e50">
-                                <font><Font name="System Bold" size="12.0" /></font>
-                            </RadioButton>
-                            <RadioButton fx:id="radioCheckOut" text="Check Out (Sortie)" toggleGroup="$checkTypeGroup" textFill="#2c3e50">
-                                <font><Font name="System Bold" size="12.0" /></font>
-                            </RadioButton>
-                        </HBox>
-                    </children>
+                    <ComboBox fx:id="employeeComboBox" maxWidth="1.7976931348623157E308" promptText="-- Select your profile --" style="-fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 14px; -fx-pref-height: 45px; -fx-text-fill: #1e293b; -fx-cursor: hand;" />
+
+                    <HBox alignment="CENTER" spacing="40.0" style="-fx-padding: 10 0 15 0;">
+                        <fx:define>
+                            <ToggleGroup fx:id="checkTypeGroup"/>
+                        </fx:define>
+                        <RadioButton fx:id="radioCheckIn" text="Check In" selected="true" toggleGroup="$checkTypeGroup" textFill="#1e293b" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand;" />
+                        <RadioButton fx:id="radioCheckOut" text="Check Out" toggleGroup="$checkTypeGroup" textFill="#1e293b" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand;" />
+                    </HBox>
+
+                    <Button fx:id="checkButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCheckButtonClick" prefHeight="50.0" style="-fx-background-color: #0b2545; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" text="CONFIRM">
+                        <font>
+                            <Font name="System Bold" size="15.0" />
+                        </font>
+                        <effect>
+                            <DropShadow blurType="GAUSSIAN" height="10.0" radius="4.5" width="10.0" offsetY="3.0">
+                                <color>
+                                    <Color opacity="0.2" red="0.04" green="0.14" blue="0.27" />
+                                </color>
+                            </DropShadow>
+                        </effect>
+                    </Button>
+
                 </VBox>
 
-                <Button fx:id="checkButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCheckButtonClick" prefHeight="55.0" style="-fx-background-color: linear-gradient(to right, #3498db, #2980b9); -fx-text-fill: white; -fx-background-radius: 15; -fx-cursor: hand;" text="Validate">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                    <effect>
-                        <DropShadow height="20.0" radius="9.5" width="20.0">
-                            <color>
-                                <Color red="0.20392157137393951" green="0.5960784554481506" blue="0.8588235378265381" opacity="0.4" />
-                            </color>
-                        </DropShadow>
-                    </effect>
-                </Button>
-
-            </children>
+            </VBox>
         </VBox>
     </children>
 </StackPane>
