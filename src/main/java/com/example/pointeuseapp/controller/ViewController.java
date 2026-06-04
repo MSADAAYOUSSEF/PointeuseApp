@@ -37,14 +37,11 @@ public class ViewController {
     public void initialize() {
         this.config = new ConfigManager();
 
-        // Initialisation du réseau avec l'IP et le port de la configuration
         NetworkClient network = new NetworkClient(config.getServerIp(), config.getServerPort());
         PendingCheckPointStore store = new PendingCheckPointStore();
         store.load();
 
         this.logicController = new CheckPointController(network, store);
-
-        // Récupération de la liste des employés depuis le serveur RH
         List<EmployeeDTO> listeEmployes = network.getEmployees();
 
         if (listeEmployes != null && !listeEmployes.isEmpty()) {
@@ -54,12 +51,10 @@ public class ViewController {
             System.err.println("Serveur injoignable ou liste vide. Vérifiez l'IP et le Port dans les paramètres.");
         }
 
-        // Horloge en temps réel
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> updateTime()),
                 new KeyFrame(Duration.seconds(1)));
         clock.setCycleCount(Timeline.INDEFINITE);
 
-        // Synchronisation automatique en arrière-plan (mode hors-ligne)
         Timeline autoSyncTimer = new Timeline(new KeyFrame(Duration.seconds(15), e -> {
             int synced = logicController.resendPending();
             if (synced > 0) {
@@ -111,7 +106,6 @@ public class ViewController {
         }
     }
 
-    // ✅ NOUVELLE MÉTHODE : Ouvre proprement la fenêtre des paramètres
     @FXML
     protected void onSettingsButtonClick() {
         try {
@@ -122,7 +116,6 @@ public class ViewController {
             dialogStage.setTitle("Paramètres Réseau");
             dialogStage.setScene(new Scene(parent));
 
-            // Empêche de cliquer sur la pointeuse tant que les paramètres sont ouverts
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setResizable(false);
 

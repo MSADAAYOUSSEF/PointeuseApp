@@ -9,15 +9,12 @@ public class PendingCheckPointStore {
 
     private List<CheckPoint> pending = new ArrayList<>();
     private static final String FILE = "pending.ser";
-
     public void add(CheckPoint cp) {
         pending.add(cp);
     }
-
     public List<CheckPoint> getAll() {
         return pending;
     }
-
     public void save() throws IOException {
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE))) {

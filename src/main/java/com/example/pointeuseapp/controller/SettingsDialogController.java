@@ -32,13 +32,13 @@ public class SettingsDialogController {
             config.saveConfig();
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                    "✅ Paramètres sauvegardés !\nVeuillez relancer la pointeuse pour appliquer les changements.");
+                    "Paramètres sauvegardés !\nVeuillez relancer la pointeuse pour appliquer les changements.");
             alert.showAndWait();
 
             closeWindow();
 
         } catch (NumberFormatException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "❌ Le port doit être un nombre valide (ex: 8080) !");
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Le port doit être un nombre valide (ex: 8080) !");
             alert.showAndWait();
         }
     }
