@@ -22,6 +22,17 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Contrôleur principal de l'interface graphique de la Pointeuse (Client).
+ * <p>
+ * Cette classe agit comme le chef d'orchestre de l'application cliente.
+ * Elle gère l'affichage en temps réel de l'horloge, l'interaction avec
+ * l'utilisateur (sélection de l'employé, bouton de pointage) et lance
+ * les processus d'arrière-plan comme la synchronisation automatique des
+ * pointages en mode hors-ligne.
+ * </p>
+ * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
+ */
 public class ViewController {
 
     @FXML private Label dateLabel;
@@ -30,9 +41,25 @@ public class ViewController {
     @FXML private ComboBox<EmployeeDTO> employeeComboBox;
     @FXML private RadioButton radioCheckIn;
 
+    /** Contrôleur logique métier gérant l'envoi et la sauvegarde locale des pointages. */
     private CheckPointController logicController;
+
+    /** Gestionnaire de configuration pour récupérer l'IP et le port du serveur. */
     private ConfigManager config;
 
+    /**
+     * Initialise l'interface au démarrage de l'application.
+     * <p>
+     * Cette méthode est appelée automatiquement par JavaFX. Elle effectue les tâches suivantes :
+     * <ul>
+     * <li>Chargement de la configuration réseau.</li>
+     * <li>Initialisation des gestionnaires réseau et de stockage local.</li>
+     * <li>Récupération de la liste des employés depuis le serveur pour peupler la liste déroulante.</li>
+     * <li>Lancement de l'horloge interne (mise à jour chaque seconde).</li>
+     * <li>Lancement d'un thread en arrière-plan (Timeline) essayant de renvoyer
+     * les pointages stockés localement toutes les 15 secondes.</li>
+     * </ul>
+     */
     @FXML
     public void initialize() {
         this.config = new ConfigManager();
@@ -42,6 +69,7 @@ public class ViewController {
         store.load();
 
         this.logicController = new CheckPointController(network, store);
+
         List<EmployeeDTO> listeEmployes = network.getEmployees();
 
         if (listeEmployes != null && !listeEmployes.isEmpty()) {
@@ -68,15 +96,30 @@ public class ViewController {
         clock.play();
     }
 
+    /**
+     * Met à jour les labels de date et d'heure sur l'interface graphique.
+     * <p>
+     * Calcule également l'heure arrondie (au quart d'heure le plus proche)
+     * en utilisant l'utilitaire {@link TimeUtils} et l'affiche à l'écran.
+     * </p>
+     */
     private void updateTime() {
         LocalDateTime now = LocalDateTime.now();
         dateLabel.setText(now.format(TimeUtils.DATE_FORMATTER));
         actualTimeLabel.setText(now.format(TimeUtils.TIME_FORMATTER));
-
         LocalDateTime rounded = TimeUtils.roundToNearestQuarter(now);
         roundedTimeLabel.setText(rounded.format(TimeUtils.TIME_FORMATTER));
     }
 
+    /**
+     * Déclenchée lors du clic sur le bouton "VALIDER" par l'employé.
+     * <p>
+     * Vérifie qu'un employé est bien sélectionné, crée un nouvel objet
+     * {@link CheckPoint} avec l'heure arrondie actuelle, puis demande au
+     * contrôleur logique de l'envoyer. Affiche ensuite une notification
+     * de succès, ou un avertissement si le pointage a dû être stocké localement.
+     * </p>
+     */
     @FXML
     protected void onCheckButtonClick() {
         EmployeeDTO selected = employeeComboBox.getValue();
@@ -106,6 +149,14 @@ public class ViewController {
         }
     }
 
+    /**
+     * Déclenchée lors du clic sur le bouton "Paramètres" (Configuration).
+     * <p>
+     * Ouvre une nouvelle fenêtre modale (qui bloque l'interaction avec la fenêtre
+     * principale) permettant à l'utilisateur de configurer l'adresse IP et le port
+     * du serveur central.
+     * </p>
+     */
     @FXML
     protected void onSettingsButtonClick() {
         try {

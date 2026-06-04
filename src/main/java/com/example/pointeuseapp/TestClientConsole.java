@@ -12,7 +12,7 @@ public class TestClientConsole {
 
         NetworkClient client = new NetworkClient("localhost", 8080);
 
-        System.out.println("⏳ Demande de la liste des employés...");
+        System.out.println("Demande de la liste des employés...");
         List<EmployeeDTO> listeEmployes = client.getEmployees();
 
         System.out.println("\n=== RÉSULTAT DU SERVEUR ===");
