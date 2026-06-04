@@ -21,7 +21,7 @@ public class HelloApplication extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         Scene scene = new Scene(fxmlLoader.load(), 400, 500);
-        stage.setTitle("Time Tracker Emulator - V2.2");
+        stage.setTitle("Émulateur de suivi du temps");
         stage.setScene(scene);
         stage.show();
     }
