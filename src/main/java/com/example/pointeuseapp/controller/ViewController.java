@@ -79,7 +79,7 @@ public class ViewController {
         actualTimeLabel.setText(now.format(TimeUtils.TIME_FORMATTER));
 
         LocalDateTime rounded = TimeUtils.roundToNearestQuarter(now);
-        roundedTimeLabel.setText("let's say " + rounded.format(TimeUtils.TIME_FORMATTER));
+        roundedTimeLabel.setText(rounded.format(TimeUtils.TIME_FORMATTER));
     }
 
     @FXML
