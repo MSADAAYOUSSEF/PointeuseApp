@@ -1,7 +1,7 @@
 package com.example.pointeuseapp.controller;
 
 import com.example.dto.EmployeeDTO;
-import com.example.dto.CheckPoint;
+import com.example.dto.CheckPointDTO;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -75,11 +75,11 @@ public class NetworkClient {
      * considère que le réseau est indisponible et retourne {@code false}.
      * </p>
      *
-     * @param cp L'objet {@link CheckPoint} contenant les données du pointage (employé, heure, type).
+     * @param cp L'objet {@link CheckPointDTO} contenant les données du pointage (employé, heure, type).
      * @return {@code true} si le serveur a bien reçu le pointage et a répondu "OK",
      * {@code false} si le serveur est injoignable ou a refusé le pointage.
      */
-    public boolean send(CheckPoint cp) {
+    public boolean send(CheckPointDTO cp) {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), 2000);
             try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());

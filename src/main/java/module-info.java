@@ -1,9 +1,7 @@
 module com.example.pointeuseapp {
     requires javafx.controls;
     requires javafx.fxml;
-    // ... vos autres requires ...
 
-    // CRUCIAL : Ouvrir les packages pour la réflexion de JavaFX
     opens com.example.pointeuseapp.controller to javafx.fxml;
     opens com.example.pointeuseapp.model to javafx.fxml;
 

@@ -1,7 +1,9 @@
 package com.example.pointeuseapp.controller;
 
-import com.example.dto.CheckPoint;
+import com.example.dto.CheckPointDTO;
 import com.example.pointeuseapp.model.PendingCheckPointStore;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +47,7 @@ public class CheckPointController {
      * @return {@code true} si le pointage a été envoyé immédiatement au serveur,
      * {@code false} s'il a été stocké localement suite à un échec réseau.
      */
-    public boolean check(CheckPoint cp) {
+    public boolean check(CheckPointDTO cp) {
         boolean sent = networkClient.send(cp);
 
         if (!sent) {
@@ -80,9 +82,9 @@ public class CheckPointController {
 
         int countSent = 0;
         boolean allSent = true;
-        List<CheckPoint> pointagesEnAttente = new java.util.ArrayList<>(store.getAll());
+        List<CheckPointDTO> pointagesEnAttente = new ArrayList<>(store.getAll());
 
-        for (CheckPoint cp : pointagesEnAttente) {
+        for (CheckPointDTO cp : pointagesEnAttente) {
             boolean sent = networkClient.send(cp);
             if (sent) {
                 countSent++;

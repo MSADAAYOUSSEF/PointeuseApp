@@ -2,13 +2,12 @@ package com.example.pointeuseapp.controller;
 
 import com.example.pointeuseapp.model.*;
 import com.example.dto.EmployeeDTO;
-import com.example.dto.CheckPoint;
+import com.example.dto.CheckPointDTO;
 import com.example.pointeuseapp.utils.ConfigManager;
 import com.example.pointeuseapp.utils.TimeUtils;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -115,7 +114,7 @@ public class ViewController {
      * Déclenchée lors du clic sur le bouton "VALIDER" par l'employé.
      * <p>
      * Vérifie qu'un employé est bien sélectionné, crée un nouvel objet
-     * {@link CheckPoint} avec l'heure arrondie actuelle, puis demande au
+     * {@link CheckPointDTO} avec l'heure arrondie actuelle, puis demande au
      * contrôleur logique de l'envoyer. Affiche ensuite une notification
      * de succès, ou un avertissement si le pointage a dû être stocké localement.
      * </p>
@@ -129,7 +128,7 @@ public class ViewController {
             String typeAction = isCheckIn ? "Entrée" : "Sortie";
 
             LocalDateTime roundedTime = TimeUtils.roundToNearestQuarter(LocalDateTime.now());
-            CheckPoint cp = new CheckPoint(selected.getId(), roundedTime, isCheckIn);
+            CheckPointDTO cp = new CheckPointDTO(selected.getId(), roundedTime, isCheckIn);
 
             boolean success = logicController.check(cp);
 

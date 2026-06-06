@@ -13,7 +13,7 @@ import java.util.UUID;
  * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
  */
 
-public class CheckPoint implements Serializable {
+public class CheckPointDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /** Identifiant unique de l'employé effectuant le pointage. */
@@ -37,7 +37,7 @@ public class CheckPoint implements Serializable {
      * @param isCheckIn  Vrai pour un Check-In (Entrée), Faux pour un Check-Out (Sortie).
      */
 
-    public CheckPoint(UUID employeeId, LocalDateTime time, boolean isCheckIn) {
+    public CheckPointDTO(UUID employeeId, LocalDateTime time, boolean isCheckIn) {
         this.employeeId = employeeId;
         this.time = time;
         this.isCheckIn = isCheckIn;

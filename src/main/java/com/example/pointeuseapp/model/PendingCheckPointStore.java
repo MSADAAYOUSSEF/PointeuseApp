@@ -1,6 +1,6 @@
 package com.example.pointeuseapp.model;
 
-import com.example.dto.CheckPoint;
+import com.example.dto.CheckPointDTO;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Gestionnaire de stockage local pour les pointages en attente (Mode Hors-ligne).
  * <p>
- * Cette classe gère la persistance des objets {@link CheckPoint} lorsque le
+ * Cette classe gère la persistance des objets {@link CheckPointDTO} lorsque le
  * serveur central est injoignable. Elle utilise la sérialisation native de Java
  * pour écrire et lire les pointages dans un fichier binaire local ({@code pending.ser}).
  * </p>
@@ -17,7 +17,7 @@ import java.util.List;
 public class PendingCheckPointStore {
 
     /** Liste en mémoire des pointages en attente de synchronisation. */
-    private List<CheckPoint> pending = new ArrayList<>();
+    private List<CheckPointDTO> pending = new ArrayList<>();
 
     /** Nom du fichier local utilisé pour la sérialisation des données. */
     private static final String FILE = "pending.ser";
@@ -27,16 +27,16 @@ public class PendingCheckPointStore {
      *
      * @param cp Le pointage (CheckPoint) n'ayant pas pu être envoyé au serveur.
      */
-    public void add(CheckPoint cp) {
+    public void add(CheckPointDTO cp) {
         pending.add(cp);
     }
 
     /**
      * Retourne la liste complète des pointages actuellement en attente.
      *
-     * @return Une liste contenant les objets {@link CheckPoint} stockés.
+     * @return Une liste contenant les objets {@link CheckPointDTO} stockés.
      */
-    public List<CheckPoint> getAll() {
+    public List<CheckPointDTO> getAll() {
         return pending;
     }
 
@@ -66,7 +66,7 @@ public class PendingCheckPointStore {
     @SuppressWarnings("unchecked")
     public void load() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE))) {
-            pending = (List<CheckPoint>) ois.readObject();
+            pending = (List<CheckPointDTO>) ois.readObject();
         } catch (Exception e) {
             pending = new ArrayList<>();
         }
@@ -82,7 +82,7 @@ public class PendingCheckPointStore {
      *
      * @param newList La nouvelle liste des pointages restants en attente.
      */
-    public void updateAll(List<CheckPoint> newList) {
+    public void updateAll(List<CheckPointDTO> newList) {
         this.pending = newList;
 
         try {
