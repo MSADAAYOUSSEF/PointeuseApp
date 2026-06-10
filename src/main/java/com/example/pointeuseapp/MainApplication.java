@@ -16,7 +16,7 @@ import java.io.IOException;
  * </p>
  * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
  */
-public class HelloApplication extends Application {
+public class MainApplication extends Application {
 
     /**
      * Point de départ de l'interface graphique JavaFX.

@@ -137,7 +137,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.pointeuseapp/com.example.pointeuseapp.HelloApplication</mainClass>
+                            <mainClass>com.example.pointeuseapp/com.example.pointeuseapp.MainApplication</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
