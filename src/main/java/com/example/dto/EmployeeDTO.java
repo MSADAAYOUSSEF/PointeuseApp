@@ -4,45 +4,55 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
- * Objet de Transfert de Données (DTO) représentant une version allégée d'un Employé.
+ * Objet de transfert de données (DTO) représentant un employé de manière simplifiée pour les échanges réseau.
  * <p>
- * Cette classe est utilisée pour transmettre la liste des employés depuis le serveur
- * vers la pointeuse. Cela permet de ne pas surcharger le réseau avec des données
- * inutiles à la pointeuse (comme les plannings, départements, ou les soldes).
+ * Cette classe immuable est conçue pour optimiser la communication entre l'application centrale et
+ * les émulateurs de pointeuses clientes. Elle encapsule uniquement les informations strictement
+ * nécessaires à l'identification visuelle et logique de l'employé (son UUID et son nom complet),
+ * évitant ainsi la sérialisation lourde et non sécurisée de l'entité métier complète {@code Employee}
+ * (qui embarque son planning, son service et son solde d'heures).
+ * Elle implémente {@link Serializable} pour permettre son transit à travers les flux TCP.
  * </p>
- * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
+ *
+ * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
  */
 public class EmployeeDTO implements Serializable {
+
+    /** Identifiant de structure pour la sérialisation et la désérialisation de la classe. */
     private static final long serialVersionUID = 1L;
 
-    /** L'identifiant unique (UUID) de l'employé. */
+    /** Identifiant unique et immuable de l'employé (UUID). */
     private final UUID id;
 
-    /** Le nom complet (Nom + Prénom) formaté pour l'affichage. */
+    /** Le nom complet agrégé de l'employé (Prénom + Nom de famille). */
     private final String fullName;
 
     /**
-     * Construit un DTO pour un employé.
+     * Construit un objet de transfert immuable avec les identifiants requis.
      *
-     * @param id       L'identifiant unique de l'employé.
-     * @param fullName Le nom complet concaténé de l'employé.
+     * @param id       L'identifiant unique {@link UUID} de l'employé.
+     * @param fullName Le nom complet formaté et prêt pour l'affichage graphique.
      */
     public EmployeeDTO(UUID id, String fullName) {
         this.id = id;
         this.fullName = fullName;
     }
 
+    /**
+     * Récupère l'identifiant unique de l'employé.
+     *
+     * @return L'identifiant {@link UUID} encapsulé.
+     */
     public UUID getId() { return id; }
 
     /**
-     * Retourne le nom complet de l'employé.
+     * Retourne la représentation textuelle de l'employé pour les composants graphiques.
      * <p>
-     * Cette méthode est particulièrement importante car elle est appelée nativement
-     * par le composant {@code ComboBox} de JavaFX pour déterminer le texte à
-     * afficher dans la liste déroulante de l'interface de la Pointeuse.
+     * Cette redéfinition est particulièrement exploitée par les listes déroulantes (ComboBox)
+     * ou les cellules d'affichage afin de présenter directement le nom complet sans traitement additionnel.
      * </p>
      *
-     * @return Le nom complet de l'employé.
+     * @return Le nom complet de l'employé sous forme de chaîne de caractères.
      */
     @Override
     public String toString() {
