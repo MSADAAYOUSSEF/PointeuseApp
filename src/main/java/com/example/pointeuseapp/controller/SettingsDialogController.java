@@ -62,8 +62,9 @@ public class SettingsDialogController {
             config.setServerPort(newPort);
             config.saveConfig();
 
+            // Le message est mis à jour pour refléter l'application immédiate
             Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                    "Paramètres sauvegardés !\nVeuillez relancer la pointeuse pour appliquer les changements.");
+                    "Paramètres sauvegardés avec succès !\nLa nouvelle adresse sera utilisée au prochain pointage.");
             alert.showAndWait();
 
             closeWindow();
@@ -73,7 +74,6 @@ public class SettingsDialogController {
             alert.showAndWait();
         }
     }
-
     /**
      * Annule la saisie en cours et ferme la fenêtre de configuration sans sauvegarder.
      */

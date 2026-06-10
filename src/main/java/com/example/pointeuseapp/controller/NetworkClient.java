@@ -2,88 +2,103 @@ package com.example.pointeuseapp.controller;
 
 import com.example.dto.EmployeeDTO;
 import com.example.dto.CheckPointDTO;
+import com.example.pointeuseapp.utils.ConfigManager;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
-import java.net.InetSocketAddress;
 
 /**
  * Client réseau responsable de la communication TCP avec le serveur central.
  * <p>
- * Cette classe encapsule la logique d'ouverture des sockets, d'envoi et de
- * réception d'objets sérialisés. Elle est conçue pour remonter proprement
- * les échecs de connexion afin de permettre au système de basculer en
- * mode hors-ligne si nécessaire.
+ * Cette classe gère l'ouverture des sockets et la transmission des objets sérialisés
+ * (DTO). Elle adopte une architecture "Stateless" (sans état) en lisant la configuration
+ * réseau (IP et port) de manière dynamique sur le disque via {@link ConfigManager} à chaque
+ * requête. Cela garantit l'application immédiate des changements de paramètres sans redémarrage.
  * </p>
- * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
+ *
+ * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
  */
 public class NetworkClient {
 
-    /** Adresse IP ou nom de domaine du serveur central. */
-    private String host;
-
-    /** Port d'écoute du serveur central. */
-    private int port;
-
     /**
-     * Initialise un nouveau client réseau avec les paramètres de connexion.
-     *
-     * @param host L'adresse IP du serveur (ex: "127.0.0.1").
-     * @param port Le port sur lequel le serveur écoute (ex: 8080).
+     * Constructeur par défaut du client réseau.
+     * <p>
+     * Ce constructeur est volontairement vide. Le client ne stocke aucune configuration
+     * en mémoire vive afin de respecter le principe de source de vérité unique
+     * (Single Source of Truth) dicté par le fichier de configuration physique.
+     * </p>
      */
-    public NetworkClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public NetworkClient() {
+        // Constructeur vide : on ne stocke plus la configuration en mémoire globale
     }
 
     /**
-     * Interroge le serveur pour récupérer la liste de tous les employés enregistrés.
+     * Interroge le serveur central pour récupérer la liste complète des employés.
      * <p>
-     * Le client envoie la commande texte "GET_EMPLOYEES" et attend en retour une
-     * liste d'objets {@link EmployeeDTO}. Cette liste sert généralement à peupler
-     * les menus déroulants de l'interface graphique.
+     * La méthode force une lecture à chaud de la configuration réseau. Elle établit ensuite
+     * une connexion TCP avec un délai d'attente (timeout) de 2 secondes. Si la connexion
+     * réussit, elle envoie la commande textuelle {@code "GET_EMPLOYEES"} et désérialise la réponse.
      * </p>
      *
-     * @return La liste des employés récupérée depuis le serveur, ou {@code null}
-     * si le serveur est injoignable ou qu'une erreur de communication survient.
+     * @return Une liste contenant les instances de {@link EmployeeDTO} récupérées depuis le serveur,
+     * ou {@code null} si le délai d'attente est dépassé ou si le serveur est injoignable.
      */
     public List<EmployeeDTO> getEmployees() {
-        try (Socket socket = new Socket(host, port);
-             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+        // 1. On force la lecture du fichier sur le disque à l'instant T
+        ConfigManager currentConfig = new ConfigManager();
+        String currentHost = currentConfig.getServerIp();
+        int currentPort = currentConfig.getServerPort();
 
-            oos.writeObject("GET_EMPLOYEES");
-            oos.flush();
+        try (Socket socket = new Socket()) {
 
-            @SuppressWarnings("unchecked")
-            List<EmployeeDTO> employesRecus = (List<EmployeeDTO>) ois.readObject();
+            socket.connect(new InetSocketAddress(currentHost, currentPort), 2000);
 
-            return employesRecus;
+            try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+
+                oos.writeObject("GET_EMPLOYEES");
+                oos.flush();
+
+                @SuppressWarnings("unchecked")
+                List<EmployeeDTO> employesRecus = (List<EmployeeDTO>) ois.readObject();
+
+                return employesRecus;
+            }
 
         } catch (Exception e) {
-            System.err.println("Impossible de récupérer la liste depuis le serveur : " + e.getMessage());
+            System.err.println("Serveur injoignable sur " + currentHost + ":" + currentPort);
             return null;
         }
     }
 
     /**
-     * Envoie un pointage (CheckPoint) au serveur pour enregistrement.
+     * Transmet un nouveau pointage au serveur central pour enregistrement.
      * <p>
-     * Cette méthode utilise un délai d'attente (timeout) de 2000 millisecondes
-     * lors de la connexion. Si le serveur ne répond pas dans ce délai, la méthode
-     * considère que le réseau est indisponible et retourne {@code false}.
+     * Comme pour la récupération, la méthode lit dynamiquement la configuration pour
+     * assurer une flexibilité à chaud. Elle établit une connexion TCP sécurisée par
+     * un timeout de 2 secondes, transfère l'objet {@link CheckPointDTO} et attend
+     * l'accusé de réception.
      * </p>
      *
-     * @param cp L'objet {@link CheckPointDTO} contenant les données du pointage (employé, heure, type).
-     * @return {@code true} si le serveur a bien reçu le pointage et a répondu "OK",
-     * {@code false} si le serveur est injoignable ou a refusé le pointage.
+     * @param cp Le pointage (Data Transfer Object) contenant l'ID de l'employé, l'heure et le type d'action.
+     * @return {@code true} si le serveur a bien reçu la donnée et a répondu {@code "OK"},
+     * {@code false} en cas d'échec réseau, de timeout, ou de rejet par le serveur.
      */
     public boolean send(CheckPointDTO cp) {
+        // 1. On force la lecture du fichier sur le disque à l'instant T
+        ConfigManager currentConfig = new ConfigManager();
+        String currentHost = currentConfig.getServerIp();
+        int currentPort = currentConfig.getServerPort();
+
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(host, port), 2000);
+            socket.connect(new InetSocketAddress(currentHost, currentPort), 2000);
+
             try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                  ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+
                 oos.writeObject(cp);
                 oos.flush();
 

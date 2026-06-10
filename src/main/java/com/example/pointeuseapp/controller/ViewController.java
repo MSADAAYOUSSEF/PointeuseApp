@@ -24,59 +24,59 @@ import java.util.List;
 /**
  * Contrôleur principal de l'interface graphique de la Pointeuse (Client).
  * <p>
- * Cette classe agit comme le chef d'orchestre de l'application cliente.
- * Elle gère l'affichage en temps réel de l'horloge, l'interaction avec
- * l'utilisateur (sélection de l'employé, bouton de pointage) et lance
- * les processus d'arrière-plan comme la synchronisation automatique des
- * pointages en mode hors-ligne.
+ * Cette classe agit comme le chef d'orchestre de l'application cliente JavaFX.
+ * Elle gère l'affichage de l'horloge en temps réel, l'interaction avec l'utilisateur
+ * (sélection de l'employé, validation de pointage), et orchestre les processus
+ * d'arrière-plan tels que la resynchronisation automatique des pointages mis en cache
+ * lors d'une perte de connexion.
  * </p>
- * * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
+ *
+ * @author Youssef M'SADAA, Ahmed DEBBACH, Youssef RIANI, Mohamed Yassine BEN ABDA, Youssef ELYAHYAOUI
  */
 public class ViewController {
 
+    /** Label affichant la date du jour. */
     @FXML private Label dateLabel;
+
+    /** Label affichant l'heure exacte en temps réel. */
     @FXML private Label actualTimeLabel;
+
+    /** Label affichant l'heure arrondie au quart d'heure le plus proche. */
     @FXML private Label roundedTimeLabel;
+
+    /** Liste déroulante contenant les employés récupérés depuis le serveur. */
     @FXML private ComboBox<EmployeeDTO> employeeComboBox;
+
+    /** Bouton radio définissant si le pointage est une entrée (Check-in). */
     @FXML private RadioButton radioCheckIn;
 
-    /** Contrôleur logique métier gérant l'envoi et la sauvegarde locale des pointages. */
+    /** Contrôleur logique métier gérant le flux d'envoi et la sauvegarde locale. */
     private CheckPointController logicController;
 
-    /** Gestionnaire de configuration pour récupérer l'IP et le port du serveur. */
-    private ConfigManager config;
+    /** Client réseau "Stateless" dédié à la communication TCP. */
+    private NetworkClient network;
 
     /**
-     * Initialise l'interface au démarrage de l'application.
+     * Initialise le contrôleur au démarrage de la vue JavaFX.
      * <p>
-     * Cette méthode est appelée automatiquement par JavaFX. Elle effectue les tâches suivantes :
+     * Configure les dépendances réseau et de stockage local, déclenche la première
+     * tentative de chargement des employés, et démarre deux processus asynchrones :
      * <ul>
-     * <li>Chargement de la configuration réseau.</li>
-     * <li>Initialisation des gestionnaires réseau et de stockage local.</li>
-     * <li>Récupération de la liste des employés depuis le serveur pour peupler la liste déroulante.</li>
-     * <li>Lancement de l'horloge interne (mise à jour chaque seconde).</li>
-     * <li>Lancement d'un thread en arrière-plan (Timeline) essayant de renvoyer
-     * les pointages stockés localement toutes les 15 secondes.</li>
+     * <li>L'horloge locale, mise à jour chaque seconde.</li>
+     * <li>Le processus de resynchronisation réseau (autoSyncTimer), exécuté toutes les 15 secondes.</li>
      * </ul>
+     * </p>
      */
     @FXML
     public void initialize() {
-        this.config = new ConfigManager();
-
-        NetworkClient network = new NetworkClient(config.getServerIp(), config.getServerPort());
+        this.network = new NetworkClient();
         PendingCheckPointStore store = new PendingCheckPointStore();
         store.load();
 
         this.logicController = new CheckPointController(network, store);
 
-        List<EmployeeDTO> listeEmployes = network.getEmployees();
-
-        if (listeEmployes != null && !listeEmployes.isEmpty()) {
-            employeeComboBox.getItems().addAll(listeEmployes);
-            System.out.println(listeEmployes.size() + " employés chargés dans l'interface !");
-        } else {
-            System.err.println("Serveur injoignable ou liste vide. Vérifiez l'IP et le Port dans les paramètres.");
-        }
+        // Chargement initial des employés
+        loadEmployeesData();
 
         Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> updateTime()),
                 new KeyFrame(Duration.seconds(1)));
@@ -87,6 +87,10 @@ public class ViewController {
             if (synced > 0) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "Reconnexion automatique : " + synced + " pointages envoyés en arrière-plan !");
                 alert.show();
+                // Si la liste était vide (dû à une déconnexion initiale), on tente de la recharger
+                if (employeeComboBox.getItems().isEmpty()) {
+                    loadEmployeesData();
+                }
             }
         }));
         autoSyncTimer.setCycleCount(Timeline.INDEFINITE);
@@ -96,10 +100,28 @@ public class ViewController {
     }
 
     /**
-     * Met à jour les labels de date et d'heure sur l'interface graphique.
+     * Interroge le serveur via le client réseau pour récupérer et afficher la liste des employés.
      * <p>
-     * Calcule également l'heure arrondie (au quart d'heure le plus proche)
-     * en utilisant l'utilitaire {@link TimeUtils} et l'affiche à l'écran.
+     * Met à jour la {@link ComboBox} si la requête réussit. En cas d'échec (serveur éteint
+     * ou IP incorrecte), un message d'erreur est tracé dans la console système.
+     * </p>
+     */
+    private void loadEmployeesData() {
+        List<EmployeeDTO> listeEmployes = network.getEmployees();
+
+        if (listeEmployes != null && !listeEmployes.isEmpty()) {
+            employeeComboBox.getItems().setAll(listeEmployes);
+            System.out.println(listeEmployes.size() + " employés chargés dans l'interface !");
+        } else {
+            System.err.println("Serveur injoignable ou liste vide. Vérifiez l'IP et le Port dans les paramètres.");
+        }
+    }
+
+    /**
+     * Rafraîchit les composants graphiques liés au temps.
+     * <p>
+     * Cette méthode est appelée dynamiquement par le thread de l'horloge.
+     * Elle formate l'heure courante et calcule l'arrondi métier via {@link TimeUtils}.
      * </p>
      */
     private void updateTime() {
@@ -111,12 +133,11 @@ public class ViewController {
     }
 
     /**
-     * Déclenchée lors du clic sur le bouton "VALIDER" par l'employé.
+     * Déclenche la création et l'envoi d'un nouveau pointage.
      * <p>
-     * Vérifie qu'un employé est bien sélectionné, crée un nouvel objet
-     * {@link CheckPointDTO} avec l'heure arrondie actuelle, puis demande au
-     * contrôleur logique de l'envoyer. Affiche ensuite une notification
-     * de succès, ou un avertissement si le pointage a dû être stocké localement.
+     * Vérifie la sélection de l'employé, génère un {@link CheckPointDTO} avec l'heure
+     * arrondie, puis délègue le traitement au {@link CheckPointController}.
+     * Affiche une notification de succès ou un avertissement de mise en cache si le serveur est injoignable.
      * </p>
      */
     @FXML
@@ -149,11 +170,11 @@ public class ViewController {
     }
 
     /**
-     * Déclenchée lors du clic sur le bouton "Paramètres" (Configuration).
+     * Ouvre la fenêtre modale de configuration des paramètres réseau.
      * <p>
-     * Ouvre une nouvelle fenêtre modale (qui bloque l'interaction avec la fenêtre
-     * principale) permettant à l'utilisateur de configurer l'adresse IP et le port
-     * du serveur central.
+     * Suspend l'exécution du contrôleur principal jusqu'à la fermeture de la modale.
+     * À sa fermeture, lance immédiatement une tentative de rechargement des données
+     * avec les nouveaux paramètres réseau.
      * </p>
      */
     @FXML
@@ -166,10 +187,15 @@ public class ViewController {
             dialogStage.setTitle("Paramètres Réseau");
             dialogStage.setScene(new Scene(parent));
 
+            // Modality bloque l'interaction avec l'application parente
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setResizable(false);
 
+            // Bloque l'exécution ici jusqu'à la fermeture de la fenêtre des paramètres
             dialogStage.showAndWait();
+
+            // Tentative immédiate de rechargement avec la nouvelle adresse IP configurée
+            loadEmployeesData();
 
         } catch (IOException e) {
             System.err.println("Erreur lors de l'ouverture des paramètres : " + e.getMessage());
